@@ -1,4 +1,4 @@
-#define SCALE_STEP 3
+#define SCALE_STEP 7
 
 #include <iostream>
 #include <vector>
@@ -18,9 +18,9 @@ std::vector<std::vector<int>> create_base_m()
 {
     std::vector<std::vector<int>> base_m;
     return base_m = {
-                { 1, 2, 3 },
-                { 4, 5, 6 },
-                { 7, 8, 9 }
+                { 9, 9, 9 },
+                { 9, 9, 9 },
+                { 9, 9, 9 }
     };
 }
 
@@ -59,29 +59,62 @@ std::vector<std::vector<int>> createM(std::vector<std::vector<int>> work_m){
 
 // Linear, Star, Circle
 
-std::vector<std::vector<int>> M_linear(std::vector<std::vector<int>> work_m){
-
+std::vector<std::vector<int>> M_Linear(std::vector<std::vector<int>> work_m){
     int index = 0;
     int b = newV/base_n;
 
     for (int i = 0; i < b-1; i++){
         for (int j = 0; j < b-1; j++){
-
-                    int i2 = index*base_n;
-                    int j2 = index*base_n;
-
-                            work_m[i2][j2+base_n] = 1;
-                            work_m[i2+base_n][j2] = 1;
-
+            int i2 = index*base_n;
+            int j2 = index*base_n;
+                work_m[i2][j2+base_n] = 1;
+                work_m[i2+base_n][j2] = 1;
         }
-
         index++;
+    }
+    return work_m;
+};
+
+std::vector<std::vector<int>> M_Star(std::vector<std::vector<int>> work_m){
+    int star_factor = 1;
+    int index = 0;
+    int b = newV/base_n-1;
+
+    int i2 = index*base_n;
+    int j2 = index*base_n;
+
+    for (int i = 0 ; i < b; i++){
+
+                work_m[i2][(j2+base_n)*star_factor] = 1;
+                work_m[(i2+base_n)*star_factor][j2] = 1;
+
+                star_factor++;
 
     }
 
     return work_m;
-
 };
+
+std::vector<std::vector<int>> M_Circle(std::vector<std::vector<int>> work_m){
+    work_m = M_Linear(work_m);
+    int b = newV/base_n;
+
+        work_m[0][(b-1)*base_n] = 1;
+        work_m[(b-1)*base_n][0] = 1;
+
+    return work_m;
+}
+
+void calc_all(std::vector<std::vector<int>> m_lin, std::vector<std::vector<int>> m_star, std::vector<std::vector<int>> m_circle){
+
+    struct sto
+    {
+        
+
+    };
+    
+
+}
 
 void print(std::vector<std::vector<int>> matrix){
     for (int i = 0; i < newV; i++){
@@ -112,10 +145,15 @@ void print_csv(std::vector<std::vector<int>> matrix){
 int main(){
     std::vector<std::vector<int>> work_m = create2DArray(newV, newV);
     std::vector<std::vector<int>> m_lin = create2DArray(newV, newV);
-
+    std::vector<std::vector<int>> m_star = create2DArray(newV, newV);
+    std::vector<std::vector<int>> m_circle = create2DArray(newV, newV);
     
     work_m = createM(work_m);
-    m_lin = M_linear(work_m);
+
+    m_lin = M_Linear(work_m);
+    m_star = M_Star(work_m);
+    m_circle = M_Circle(work_m);
+
 
     cout << endl << "===============" << endl;
     cout << "BIIIG matrix: " << endl;
@@ -124,4 +162,14 @@ int main(){
     cout << endl << "===============" << endl;
     cout << "Linear matrix: " << endl;
     print(m_lin);
+
+    cout << endl << "===============" << endl;
+    cout << "Star matrix: " << endl;
+    print(m_star);
+
+    cout << endl << "===============" << endl;
+    cout << "Circle matrix: " << endl;
+    print(m_circle);
+
+    cout << endl << endl << "===============" << endl;
 }
