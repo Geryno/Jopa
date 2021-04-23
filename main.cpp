@@ -1,4 +1,4 @@
-#define SCALE_STEP 7
+#define SCALE_STEP 4
 
 #include <iostream>
 #include <vector>
@@ -6,8 +6,17 @@
 
 using namespace std;
 
+float global;
 const int base_n = 3;       // Размер блока "памяти"
 const int newV = base_n * SCALE_STEP;
+struct sto
+    {
+        int D;
+        float D_average;
+        int C;
+        int S;
+        float T;
+    };
 
 std::vector<std::vector<int>> create2DArray(unsigned height, unsigned width)
 {
@@ -17,12 +26,14 @@ std::vector<std::vector<int>> create2DArray(unsigned height, unsigned width)
 std::vector<std::vector<int>> create_base_m()
 {
     std::vector<std::vector<int>> base_m;
-    return base_m = {
-                { 9, 9, 9 },
-                { 9, 9, 9 },
-                { 9, 9, 9 }
+    return base_m = {\
+                { 0, 1, 1 },
+                { 1, 0, 1 },
+                { 1, 1, 0 }
     };
 }
+
+// ===== Создание матриц смежности =====
 
 std::vector<std::vector<int>> createM(std::vector<std::vector<int>> work_m){
     std::vector<std::vector<int>> base_m = create_base_m();
@@ -56,8 +67,6 @@ std::vector<std::vector<int>> createM(std::vector<std::vector<int>> work_m){
 
     return work_m;
 }
-
-// Linear, Star, Circle
 
 std::vector<std::vector<int>> M_Linear(std::vector<std::vector<int>> work_m){
     int index = 0;
@@ -99,21 +108,135 @@ std::vector<std::vector<int>> M_Circle(std::vector<std::vector<int>> work_m){
     work_m = M_Linear(work_m);
     int b = newV/base_n;
 
+    if (b > 1){
         work_m[0][(b-1)*base_n] = 1;
         work_m[(b-1)*base_n][0] = 1;
+    }
 
     return work_m;
 }
 
-void calc_all(std::vector<std::vector<int>> m_lin, std::vector<std::vector<int>> m_star, std::vector<std::vector<int>> m_circle){
+// ===== Просчеты топологических характеристик =====
 
-    struct sto
-    {
-        
+int dij_algo(std::vector<std::vector<int>> matrix, int q) {   
+    int number = 0;
+    int MAX_D = 0;
+    int num_sum = 0;
+    int distance[newV], count, index, i, u;
+    bool visited[newV];
 
-    };
+
+        for (i = 0; i < newV; i++) {
+            distance[i] = INT_MAX;
+            visited[i] = false;
+        }
+
+        distance[q] = 0;
+
+        for (count = 0; count < newV - 1; count++) {
+            int min = INT_MAX;
+            for (i = 0; i < newV; i++)
+                if (!visited[i] && distance[i] <= min) {
+                    min = distance[i];
+                    index = i;
+                }
+
+            u = index;
+            visited[u] = true;
+
+            for (i = 0; i < newV; i++)
+                if (!visited[i] && matrix[u][i] && distance[u] != INT_MAX &&
+                    distance[u] + matrix[u][i] < distance[i])
+                    distance[i] = distance[u] + matrix[u][i];
+        }
+
+        for (i = 0; i < newV; i++)
+            if (distance[i] != INT_MAX) {
+                if (distance[i] > MAX_D)
+                {
+                    MAX_D = distance[i];
+                }
+                number += distance[i];
+            }
+
+        global += number;
+
+
+    return MAX_D;    
+}
+
+std::vector<int> calc_CS(std::vector<std::vector<int>> matrix){
+
+    int sum_1 = 0;
+    int max_sum = 0;
+    //float T = 0;
+
+    for (int i = 0; i < newV; i++) {
+
+        int s_sum = 0;
+
+        for (int j = 0; j < newV; j++) {
+            if (matrix[i][j] == 1) {
+                sum_1++;
+                s_sum++;
+            }
+        }
+
+        if (max_sum < s_sum) {
+            max_sum = s_sum;
+        }
+
+    }
     
+    std::vector<int> ans = {sum_1/2, max_sum};
 
+    return ans;     // [0] - C; [1] - S
+}
+
+vector<sto> calc_all(std::vector<std::vector<int>> m_lin, std::vector<std::vector<int>> m_star, std::vector<std::vector<int>> m_circle){
+    sto linear, star, circle;
+    int temp;
+    std::vector<int> temp2(1);
+
+    // Линейка:
+    for (int q = 0; q < newV; q++) {
+    temp = dij_algo(m_lin, q);
+    }
+    temp2 = calc_CS(m_lin);
+        linear.D = temp;
+        linear.D_average = (global / (newV * (newV - 1)));
+        linear.C = temp2[0];
+        linear.S = temp2[1];
+        linear.T = (2 * linear.D_average) / linear.S;
+
+    // Звезда:
+    global = 0;
+    for (int q = 0; q < newV; q++) {
+        temp = dij_algo(m_star, q);
+    }
+    temp2 = calc_CS(m_star);
+        star.D = temp;
+        star.D_average = (global / (newV * (newV - 1)));
+        star.C = temp2[0];
+        star.S = temp2[1];
+        star.T = (2 * star.D_average) / star.S;
+
+    // Круг:
+    global = 0;
+    for (int q = 0; q < newV; q++) {
+        temp = dij_algo(m_circle, q);
+    }
+    temp2 = calc_CS(m_circle);
+        circle.D = temp;
+        circle.D_average = (global / (newV * (newV - 1)));
+        circle.C = temp2[0];
+        circle.S = temp2[1];
+        circle.T = (2 * circle.D_average) / circle.S;
+
+    
+    vector<sto> ans;
+    ans = {linear, star, circle};
+    return ans;
 }
 
 void print(std::vector<std::vector<int>> matrix){
@@ -143,10 +266,12 @@ void print_csv(std::vector<std::vector<int>> matrix){
 }
 
 int main(){
+    global = 0.0;
     std::vector<std::vector<int>> work_m = create2DArray(newV, newV);
     std::vector<std::vector<int>> m_lin = create2DArray(newV, newV);
     std::vector<std::vector<int>> m_star = create2DArray(newV, newV);
     std::vector<std::vector<int>> m_circle = create2DArray(newV, newV);
+    vector<sto> calc;
     
     work_m = createM(work_m);
 
@@ -154,22 +279,39 @@ int main(){
     m_star = M_Star(work_m);
     m_circle = M_Circle(work_m);
 
+    /*
+    m_lin = {
+        {0, 1, 1, 0, 0, 0 },
+        {1, 0, 1, 0, 0, 0 },
+        {1, 1, 0, 1, 0, 0 },
+        {0, 0, 1, 0, 1, 1 },
+        {0, 0, 0, 1, 0, 1 },
+        {0, 0, 0, 1, 1, 0 }
+    };
+    */
 
-    cout << endl << "===============" << endl;
-    cout << "BIIIG matrix: " << endl;
-    print(work_m);
 
-    cout << endl << "===============" << endl;
+
+    calc = calc_all(m_lin, m_star, m_circle);
+
+
+    //cout << endl << "===============" << endl;
+    //cout << "BIIIG matrix: " << endl;
+    //print(work_m);
+
+    cout  << endl << "===============" << endl;
     cout << "Linear matrix: " << endl;
     print(m_lin);
-
-    cout << endl << "===============" << endl;
-    cout << "Star matrix: " << endl;
-    print(m_star);
-
-    cout << endl << "===============" << endl;
-    cout << "Circle matrix: " << endl;
-    print(m_circle);
+    cout << endl << "D: " << calc[0].D << ",   D_avg: " << calc[0].D_average << ",   S: " << calc[0].S << ",   C: " << calc[0].C << ",   T: " << calc[0].T;
 
     cout << endl << endl << "===============" << endl;
+    cout << "Star matrix: " << endl;
+    print(m_star);
+    cout << endl << "D: " << calc[1].D << ",   D_avg: " << calc[1].D_average << ",   S: " << calc[1].S << ",   C: " << calc[1].C << ",   T: " << calc[1].T;
+
+    cout << endl << endl << "===============" << endl;
+    cout << "Circle matrix: " << endl;
+    print(m_circle);
+    cout << endl << "D: " << calc[2].D << ",   D_avg: " << calc[2].D_average << ",   S: " << calc[2].S << ",   C: " << calc[2].C << ",   T: " << calc[2].T << endl << endl;
+
 }
