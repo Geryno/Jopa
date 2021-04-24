@@ -1,4 +1,9 @@
-#define SCALE_STEP 4
+#define SCALE_STEP 1
+
+#define COLOR       "\033[33m"   
+#define MATRIX_COL  "\033[90m"  
+#define WHITE       "\033[37m"    
+
 
 #include <iostream>
 #include <vector>
@@ -7,7 +12,7 @@
 using namespace std;
 
 float global;
-const int base_n = 3;       // Размер блока "памяти"
+const int base_n = 7;       // Размер блока "памяти"
 const int newV = base_n * SCALE_STEP;
 struct sto
     {
@@ -26,10 +31,19 @@ std::vector<std::vector<int>> create2DArray(unsigned height, unsigned width)
 std::vector<std::vector<int>> create_base_m()
 {
     std::vector<std::vector<int>> base_m;
-    return base_m = {\
-                { 0, 1, 1 },
-                { 1, 0, 1 },
-                { 1, 1, 0 }
+    // return base_m = {
+    //             { 0, 1, 1 },
+    //             { 1, 0, 1 },
+    //             { 1, 1, 0 }
+    // };
+    return base_m = {
+                { 0, 1, 1, 1, 0, 0, 0 },
+                { 1, 0, 0, 0, 1, 1, 0 },
+                { 1, 0, 0, 0, 0, 1, 0 },
+                { 1, 0, 0, 0, 0, 1, 1 },
+                { 0, 1, 0, 0, 0, 1, 0 },
+                { 0, 1, 1, 1, 1, 1, 0 },
+                { 0, 0, 0, 1, 0, 1, 0 },
     };
 }
 
@@ -121,7 +135,6 @@ std::vector<std::vector<int>> M_Circle(std::vector<std::vector<int>> work_m){
 int dij_algo(std::vector<std::vector<int>> matrix, int q) {   
     int number = 0;
     int MAX_D = 0;
-    int num_sum = 0;
     int distance[newV], count, index, i, u;
     bool visited[newV];
 
@@ -279,39 +292,40 @@ int main(){
     m_star = M_Star(work_m);
     m_circle = M_Circle(work_m);
 
-    /*
-    m_lin = {
-        {0, 1, 1, 0, 0, 0 },
-        {1, 0, 1, 0, 0, 0 },
-        {1, 1, 0, 1, 0, 0 },
-        {0, 0, 1, 0, 1, 1 },
-        {0, 0, 0, 1, 0, 1 },
-        {0, 0, 0, 1, 1, 0 }
-    };
-    */
+    
+    //m_lin = {
+    //    {0, 1, 1, 0, 0, 0 },
+    //    {1, 0, 1, 0, 0, 0 },
+    //    {1, 1, 0, 1, 0, 0 },
+    //    {0, 0, 1, 0, 1, 1 },
+    //    {0, 0, 0, 1, 0, 1 },
+    //    {0, 0, 0, 1, 1, 0 }
+    //};
+    
 
 
 
     calc = calc_all(m_lin, m_star, m_circle);
+    cout.precision(4);
 
 
     //cout << endl << "===============" << endl;
     //cout << "BIIIG matrix: " << endl;
     //print(work_m);
 
-    cout  << endl << "===============" << endl;
-    cout << "Linear matrix: " << endl;
+    cout << COLOR << endl << "===============" << endl;
+    cout << "Linear matrix: " << MATRIX_COL << endl;
     print(m_lin);
-    cout << endl << "D: " << calc[0].D << ",   D_avg: " << calc[0].D_average << ",   S: " << calc[0].S << ",   C: " << calc[0].C << ",   T: " << calc[0].T;
+    cout << WHITE << "D: " << calc[0].D << ",   D_avg: " << calc[0].D_average << ",   S: " << calc[0].S << ",   C: " << calc[0].C << ",   T: " << calc[0].T;
 
-    cout << endl << endl << "===============" << endl;
-    cout << "Star matrix: " << endl;
+    cout << COLOR << endl << endl << "===============" << endl;
+    cout << "Star matrix: " << MATRIX_COL << endl;
     print(m_star);
-    cout << endl << "D: " << calc[1].D << ",   D_avg: " << calc[1].D_average << ",   S: " << calc[1].S << ",   C: " << calc[1].C << ",   T: " << calc[1].T;
+    cout << WHITE << "D: " << calc[1].D << ",   D_avg: " << calc[1].D_average << ",   S: " << calc[1].S << ",   C: " << calc[1].C << ",   T: " << calc[1].T;
 
-    cout << endl << endl << "===============" << endl;
-    cout << "Circle matrix: " << endl;
+    cout << COLOR << endl << endl << "===============" << endl;
+    cout << "Circle matrix: " << MATRIX_COL << endl;
     print(m_circle);
-    cout << endl << "D: " << calc[2].D << ",   D_avg: " << calc[2].D_average << ",   S: " << calc[2].S << ",   C: " << calc[2].C << ",   T: " << calc[2].T << endl << endl;
+    cout << WHITE << "D: " << calc[2].D << ",   D_avg: " << calc[2].D_average << ",   S: " << calc[2].S << ",   C: " << calc[2].C << ",   T: " << calc[2].T << endl << endl;
 
 }
